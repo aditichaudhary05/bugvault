@@ -1,0 +1,252 @@
+.home {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  padding: 100px 60px 40px;
+  box-sizing: border-box;
+}
+
+.home__layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1100px;
+  gap: 60px;
+  flex: 1;
+}
+
+.home__left {
+  flex: 1;
+}
+
+.home__pill {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 50px;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  background: rgba(124, 58, 237, 0.08);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 24px;
+}
+
+.home__title {
+  font-size: 3.8rem;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.15;
+  margin: 0 0 20px 0;
+}
+
+.home__title--accent {
+  color: #7C3AED;
+}
+
+.home__subtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 32px 0;
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+.home__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.home__btn {
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.home__btn--primary {
+  background: rgba(124, 58, 237, 0.25);
+  color: #ffffff;
+  border: 1px solid rgba(124, 58, 237, 0.4);
+}
+
+.home__btn--primary:hover {
+  background: rgba(124, 58, 237, 0.4);
+}
+
+.home__btn--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.home__btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.home__right {
+  flex: 0 0 auto;
+}
+
+.home__quick-actions {
+  width: 340px;
+}
+
+.home__quick-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 20px 0;
+}
+
+.home__quick-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #ffffff;
+  transition: background 0.2s;
+  margin-bottom: 4px;
+}
+
+.home__quick-item:last-child {
+  margin-bottom: 0;
+}
+
+.home__quick-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.home__quick-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7C3AED;
+  flex-shrink: 0;
+}
+
+.home__quick-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.home__quick-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.home__quick-desc {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.home__quick-arrow {
+  color: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.home__stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  max-width: 1100px;
+  margin-top: 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 20px 0;
+  backdrop-filter: blur(12px);
+}
+
+.home__stat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 28px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.home__stat:last-child {
+  border-right: none;
+}
+
+.home__stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+.home__stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.home__stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.home__stat-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 900px) {
+  .home {
+    padding: 100px 24px 30px;
+  }
+
+  .home__layout {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .home__title {
+    font-size: 2.8rem;
+  }
+
+  .home__quick-actions {
+    width: 100%;
+  }
+
+  .home__stats {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .home__stat {
+    flex: 1 1 40%;
+    border-right: none;
+    padding: 12px;
+  }
+}
