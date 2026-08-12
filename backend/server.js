@@ -1,5 +1,6 @@
 import express from 'express';
 import session from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -65,19 +66,28 @@ app.use(cors({
 
 app.use(express.json({ limit: '100kb' }));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax',
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    },
-  })
-);
+const PgSession = connectPgSimple(session);
+
+const sessionConfig = {
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'strict' : 'lax',
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+};
+
+if (isProduction) {
+  sessionConfig.store = new PgSession({
+    pool,
+    tableName: 'user_sessions',
+  });
+}
+
+app.use(session(sessionConfig));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -93,6 +103,18 @@ app.use('/uploads', requireAuth, express.static(join(__dirname, 'uploads')));
 
 async function initDB() {
   try {
+    if (isProduction) {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS user_sessions (
+          sid VARCHAR NOT NULL COLLATE "default",
+          sess JSON NOT NULL,
+          expire TIMESTAMP(6) NOT NULL,
+          PRIMARY KEY (sid)
+        )
+      `);
+      await pool.query('CREATE INDEX IF NOT EXISTS "IDX_user_sessions_expire" ON user_sessions (expire)');
+    }
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -148,7 +170,7 @@ async function initDB() {
       END $$;
     `);
   } catch (err) {
-    console.error('Database initialization error');
+    console.error('Database initialization error:', err.message);
     process.exit(1);
   }
 }
