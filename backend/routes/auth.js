@@ -6,6 +6,10 @@ import pool from '../db.js';
 const router = Router();
 const saltRounds = 10;
 
+const NAME_MAX = 100;
+const EMAIL_MAX = 255;
+const PASSWORD_MAX = 128;
+
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -13,11 +17,20 @@ router.post('/register', async (req, res) => {
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: 'Name is required' });
     }
+    if (name.trim().length > NAME_MAX) {
+      return res.status(400).json({ success: false, message: `Name must be at most ${NAME_MAX} characters` });
+    }
     if (!email || !email.trim()) {
       return res.status(400).json({ success: false, message: 'Email is required' });
     }
+    if (email.trim().length > EMAIL_MAX) {
+      return res.status(400).json({ success: false, message: 'Invalid email format' });
+    }
     if (!password || password.length < 6) {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    }
+    if (password.length > PASSWORD_MAX) {
+      return res.status(400).json({ success: false, message: `Password must be at most ${PASSWORD_MAX} characters` });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -48,7 +61,7 @@ router.post('/register', async (req, res) => {
 
     return res.status(201).json({ success: true, user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
-    console.error('Register error:', err.message);
+    console.error('Register error');
     return res.status(500).json({ success: false, message: 'Server error during registration' });
   }
 });
@@ -56,7 +69,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) {
-      console.error('Login error:', err.message);
+      console.error('Login error');
       return res.status(500).json({ success: false, message: 'Server error during login' });
     }
     if (!user) {
@@ -64,7 +77,7 @@ router.post('/login', (req, res, next) => {
     }
     req.login(user, (err) => {
       if (err) {
-        console.error('Login session error:', err.message);
+        console.error('Login session error');
         return res.status(500).json({ success: false, message: 'Login failed' });
       }
       return res.json({ success: true, user: { id: user.id, name: user.name, email: user.email } });
@@ -75,11 +88,15 @@ router.post('/login', (req, res, next) => {
 router.post('/logout', (req, res) => {
   req.logout((err) => {
     if (err) {
-      console.error('Logout error:', err.message);
+      console.error('Logout error');
       return res.status(500).json({ success: false, message: 'Logout failed' });
     }
     req.session.destroy(() => {
-      res.clearCookie('connect.sid');
+      res.clearCookie('connect.sid', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      });
       return res.json({ success: true, message: 'Logged out' });
     });
   });

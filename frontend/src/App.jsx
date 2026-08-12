@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import HomeNavbar from './components/HomeNavbar'
 import DarkVeil from './components/DarkVeil'
 import TextType from './components/TextType'
 import SpecularButton from './components/SpecularButton'
@@ -9,6 +10,11 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import NewBug from './pages/NewBug'
 import Bugs from './pages/Bugs'
+import BugDetail from './pages/BugDetail'
+import EditBug from './pages/EditBug'
+import Profile from './pages/Profile'
+import Stats from './pages/Stats'
+import Tags from './pages/Tags'
 import './App.css'
 
 function ProtectedRoute({ user, loading, children }) {
@@ -114,6 +120,32 @@ function App() {
 
   return (
     <BrowserRouter>
+      <AppRoutes user={user} setUser={setUser} loading={loading} />
+    </BrowserRouter>
+  )
+}
+
+function AppRoutes({ user, setUser, loading }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const isLandingPage = location.pathname === '/'
+
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:7000/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      setUser(null);
+      window.location.href = '/';
+    } catch {
+      console.error('Logout failed');
+    }
+  };
+
+  return (
+    <>
+      {user && !isLandingPage && <HomeNavbar user={user} onLogout={handleLogout} />}
       <Routes>
         <Route path="/" element={<LandingPage user={user} />} />
         <Route path="/login" element={user ? <Navigate to="/home" replace /> : <Login setUser={setUser} />} />
@@ -133,9 +165,34 @@ function App() {
             <NewBug />
           </ProtectedRoute>
         } />
+        <Route path="/bugs/:id" element={
+          <ProtectedRoute user={user} loading={loading}>
+            <BugDetail />
+          </ProtectedRoute>
+        } />
+        <Route path="/bugs/:id/edit" element={
+          <ProtectedRoute user={user} loading={loading}>
+            <EditBug />
+          </ProtectedRoute>
+        } />
+        <Route path="/stats" element={
+          <ProtectedRoute user={user} loading={loading}>
+            <Stats user={user} setUser={setUser} />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute user={user} loading={loading}>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/tags" element={
+          <ProtectedRoute user={user} loading={loading}>
+            <Tags user={user} setUser={setUser} />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </>
   )
 }
 

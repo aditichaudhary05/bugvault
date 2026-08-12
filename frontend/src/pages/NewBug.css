@@ -6,14 +6,23 @@
   height: 100%;
   overflow-y: auto;
   z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 50px 10px 10px;
+  box-sizing: border-box;
 }
 
 .newbug-modal {
   width: 100%;
   max-width: 640px;
-  margin: 40px auto;
+  max-height: 80vh;
+  overflow-y: auto;
+  margin: 60px auto 40px;
   padding: 32px;
   position: relative;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .newbug-modal__close {
@@ -111,6 +120,8 @@
 .newbug-modal__input,
 .newbug-modal__select,
 .newbug-modal__textarea {
+  width: 100%;
+  min-width: 0;
   padding: 12px 14px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -121,6 +132,7 @@
   outline: none;
   transition: border-color 0.2s, background 0.2s;
   resize: vertical;
+  box-sizing: border-box;
 }
 
 .newbug-modal__input::placeholder,
@@ -295,12 +307,14 @@
   margin: 0 0 8px 0;
 }
 
+@media (max-width: 760px) {
+  .newbug-modal__row {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .newbug-modal {
     padding: 24px;
-  }
-
-  .newbug-modal__row {
-    grid-template-columns: 1fr;
   }
 }

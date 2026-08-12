@@ -5,10 +5,10 @@ import './Navbar.css';
 export default function Navbar() {
   return (
     <nav className="navbar">
-      <a href="/" className="navbar__logo">
+      <Link to="/" className="navbar__logo">
         <img src="/logo.svg" alt="" className="navbar__logo-icon" />
         <img src="/logo%20text.png" alt="BugVault" className="navbar__logo-text" />
-      </a>
+      </Link>
       <div className="navbar__links">
         <GlareHover
           width="auto"

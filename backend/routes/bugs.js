@@ -6,6 +6,22 @@ const router = Router();
 
 router.use(requireAuth);
 
+const TITLE_MAX = 255;
+const CONTEXT_MAX = 255;
+const SEVERITY_ENUM = ['Low', 'Medium', 'High', 'Critical'];
+const STATUS_ENUM = ['Open', 'In Progress', 'Resolved', 'Closed'];
+const LANGUAGE_MAX = 50;
+const TEXT_MAX = 10000;
+const TAG_MAX = 50;
+const MAX_TAGS = 10;
+
+function sanitizeString(val, max) {
+  if (typeof val !== 'string') return null;
+  const trimmed = val.trim();
+  if (!trimmed) return null;
+  return trimmed.slice(0, max);
+}
+
 router.post('/', async (req, res) => {
   try {
     const {
@@ -15,6 +31,25 @@ router.post('/', async (req, res) => {
 
     if (!title || !title.trim()) {
       return res.status(400).json({ success: false, message: 'Title is required' });
+    }
+    if (title.trim().length > TITLE_MAX) {
+      return res.status(400).json({ success: false, message: `Title must be at most ${TITLE_MAX} characters` });
+    }
+    if (severity && !SEVERITY_ENUM.includes(severity)) {
+      return res.status(400).json({ success: false, message: 'Invalid severity value' });
+    }
+    if (language && language.length > LANGUAGE_MAX) {
+      return res.status(400).json({ success: false, message: 'Language name too long' });
+    }
+    if (Array.isArray(tags)) {
+      if (tags.length > MAX_TAGS) {
+        return res.status(400).json({ success: false, message: `Maximum ${MAX_TAGS} tags allowed` });
+      }
+      for (const tag of tags) {
+        if (typeof tag !== 'string' || tag.trim().length > TAG_MAX) {
+          return res.status(400).json({ success: false, message: 'Invalid tag' });
+        }
+      }
     }
 
     const result = await pool.query(
@@ -26,24 +61,24 @@ router.post('/', async (req, res) => {
       RETURNING *`,
       [
         req.user.id,
-        title.trim(),
-        project || null,
-        severity || 'Medium',
-        whatHappened || null,
-        stepsToReproduce || null,
-        expectedBehavior || null,
-        actualBehavior || null,
-        rootCause || null,
-        tags ? JSON.stringify(tags) : '[]',
-        solution || null,
-        codeSnippet || null,
-        language || 'JavaScript'
+        title.trim().slice(0, TITLE_MAX),
+        sanitizeString(project, CONTEXT_MAX),
+        SEVERITY_ENUM.includes(severity) ? severity : 'Medium',
+        sanitizeString(whatHappened, TEXT_MAX),
+        sanitizeString(stepsToReproduce, TEXT_MAX),
+        sanitizeString(expectedBehavior, TEXT_MAX),
+        sanitizeString(actualBehavior, TEXT_MAX),
+        sanitizeString(rootCause, TEXT_MAX),
+        Array.isArray(tags) ? JSON.stringify(tags.map(t => t.trim().slice(0, TAG_MAX)).slice(0, MAX_TAGS)) : '[]',
+        sanitizeString(solution, TEXT_MAX),
+        sanitizeString(codeSnippet, TEXT_MAX),
+        sanitizeString(language, LANGUAGE_MAX) || 'JavaScript'
       ]
     );
 
     return res.status(201).json({ success: true, bug: result.rows[0] });
   } catch (err) {
-    console.error('Create bug error:', err);
+    console.error('Create bug error');
     return res.status(500).json({ success: false, message: 'Server error creating bug' });
   }
 });
@@ -56,7 +91,7 @@ router.get('/', async (req, res) => {
     );
     return res.json({ success: true, bugs: result.rows });
   } catch (err) {
-    console.error('Get bugs error:', err);
+    console.error('Get bugs error');
     return res.status(500).json({ success: false, message: 'Server error fetching bugs' });
   }
 });
@@ -64,6 +99,9 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid bug ID' });
+    }
     const result = await pool.query(
       'SELECT * FROM bugs WHERE id = $1 AND user_id = $2',
       [id, req.user.id]
@@ -75,7 +113,7 @@ router.get('/:id', async (req, res) => {
 
     return res.json({ success: true, bug: result.rows[0] });
   } catch (err) {
-    console.error('Get bug error:', err);
+    console.error('Get bug error');
     return res.status(500).json({ success: false, message: 'Server error fetching bug' });
   }
 });
@@ -83,6 +121,9 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid bug ID' });
+    }
     const existing = await pool.query(
       'SELECT id FROM bugs WHERE id = $1 AND user_id = $2',
       [id, req.user.id]
@@ -94,8 +135,31 @@ router.put('/:id', async (req, res) => {
 
     const {
       title, project, severity, whatHappened, stepsToReproduce,
-      expectedBehavior, actualBehavior, rootCause, tags, solution, codeSnippet, language
+      expectedBehavior, actualBehavior, rootCause, tags, solution, codeSnippet, language, status
     } = req.body;
+
+    if (title !== undefined && (!title || !title.trim())) {
+      return res.status(400).json({ success: false, message: 'Title cannot be empty' });
+    }
+    if (title && title.trim().length > TITLE_MAX) {
+      return res.status(400).json({ success: false, message: `Title must be at most ${TITLE_MAX} characters` });
+    }
+    if (severity && !SEVERITY_ENUM.includes(severity)) {
+      return res.status(400).json({ success: false, message: 'Invalid severity value' });
+    }
+    if (status && !STATUS_ENUM.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status value' });
+    }
+    if (Array.isArray(tags)) {
+      if (tags.length > MAX_TAGS) {
+        return res.status(400).json({ success: false, message: `Maximum ${MAX_TAGS} tags allowed` });
+      }
+      for (const tag of tags) {
+        if (typeof tag !== 'string' || tag.trim().length > TAG_MAX) {
+          return res.status(400).json({ success: false, message: 'Invalid tag' });
+        }
+      }
+    }
 
     const result = await pool.query(
       `UPDATE bugs SET
@@ -111,21 +175,31 @@ router.put('/:id', async (req, res) => {
         solution = COALESCE($10, solution),
         code_snippet = COALESCE($11, code_snippet),
         language = COALESCE($12, language),
+        status = COALESCE($13, status),
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $13 AND user_id = $14
+      WHERE id = $14 AND user_id = $15
       RETURNING *`,
       [
-        title, project, severity, whatHappened, stepsToReproduce,
-        expectedBehavior, actualBehavior, rootCause,
-        tags ? JSON.stringify(tags) : null,
-        solution, codeSnippet, language,
+        title ? title.trim().slice(0, TITLE_MAX) : null,
+        project !== undefined ? sanitizeString(project, CONTEXT_MAX) : null,
+        severity || null,
+        whatHappened !== undefined ? sanitizeString(whatHappened, TEXT_MAX) : null,
+        stepsToReproduce !== undefined ? sanitizeString(stepsToReproduce, TEXT_MAX) : null,
+        expectedBehavior !== undefined ? sanitizeString(expectedBehavior, TEXT_MAX) : null,
+        actualBehavior !== undefined ? sanitizeString(actualBehavior, TEXT_MAX) : null,
+        rootCause !== undefined ? sanitizeString(rootCause, TEXT_MAX) : null,
+        tags ? JSON.stringify(tags.map(t => t.trim().slice(0, TAG_MAX)).slice(0, MAX_TAGS)) : null,
+        solution !== undefined ? sanitizeString(solution, TEXT_MAX) : null,
+        codeSnippet !== undefined ? sanitizeString(codeSnippet, TEXT_MAX) : null,
+        language !== undefined ? sanitizeString(language, LANGUAGE_MAX) : null,
+        status || null,
         id, req.user.id
       ]
     );
 
     return res.json({ success: true, bug: result.rows[0] });
   } catch (err) {
-    console.error('Update bug error:', err);
+    console.error('Update bug error');
     return res.status(500).json({ success: false, message: 'Server error updating bug' });
   }
 });
@@ -133,6 +207,9 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid bug ID' });
+    }
     const result = await pool.query(
       'DELETE FROM bugs WHERE id = $1 AND user_id = $2 RETURNING id',
       [id, req.user.id]
@@ -144,7 +221,7 @@ router.delete('/:id', async (req, res) => {
 
     return res.json({ success: true, message: 'Bug deleted' });
   } catch (err) {
-    console.error('Delete bug error:', err);
+    console.error('Delete bug error');
     return res.status(500).json({ success: false, message: 'Server error deleting bug' });
   }
 });

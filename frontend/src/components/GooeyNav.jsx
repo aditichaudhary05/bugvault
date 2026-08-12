@@ -17,6 +17,10 @@ const GooeyNav = ({
   const textRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(initialActiveIndex);
 
+  useEffect(() => {
+    setActiveIndex(initialActiveIndex);
+  }, [initialActiveIndex]);
+
   const noise = (n = 1) => n / 2 - Math.random() * n;
 
   const getXY = (distance, pointIndex, totalPoints) => {
@@ -133,6 +137,10 @@ const GooeyNav = ({
     if (activeLi) {
       updateEffectPosition(activeLi);
       textRef.current?.classList.add('active');
+    } else if (filterRef.current) {
+      filterRef.current.style.transform = 'scale(0)';
+      filterRef.current.style.opacity = '0';
+      textRef.current?.classList.remove('active');
     }
 
     const resizeObserver = new ResizeObserver(() => {

@@ -1,23 +1,69 @@
 import express from 'express';
 import session from 'express-session';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import passport from './passport.js';
 import pool from './db.js';
 import authRoutes from './routes/auth.js';
 import bugRoutes from './routes/bugs.js';
+import statsRoutes from './routes/stats.js';
+import tagsRoutes from './routes/tags.js';
+import profileRoutes from './routes/profile.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 7000;
+const isProduction = process.env.NODE_ENV === 'production';
+
+app.use(helmet());
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { success: false, message: 'Too many attempts, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { success: false, message: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+];
+
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
 
 app.use(
   session({
@@ -26,7 +72,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
@@ -35,8 +82,14 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/bugs', bugRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/bugs', apiLimiter, bugRoutes);
+app.use('/api/stats', apiLimiter, statsRoutes);
+app.use('/api/tags', apiLimiter, tagsRoutes);
+app.use('/api/profile', apiLimiter, profileRoutes);
+
+import { requireAuth } from './middleware/auth.js';
+app.use('/uploads', requireAuth, express.static(join(__dirname, 'uploads')));
 
 async function initDB() {
   try {
@@ -66,14 +119,36 @@ async function initDB() {
         solution TEXT,
         code_snippet TEXT,
         language VARCHAR(50) DEFAULT 'JavaScript',
+        status VARCHAR(50) DEFAULT 'Open',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
     console.log('Database tables initialized');
+
+    await pool.query(`
+      DO $$ BEGIN
+        ALTER TABLE bugs ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Open';
+      EXCEPTION WHEN duplicate_column THEN null;
+      END $$;
+    `);
+
+    await pool.query(`
+      DO $$ BEGIN
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';
+      EXCEPTION WHEN duplicate_column THEN null;
+      END $$;
+    `);
+
+    await pool.query(`
+      DO $$ BEGIN
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_picture TEXT DEFAULT '';
+      EXCEPTION WHEN duplicate_column THEN null;
+      END $$;
+    `);
   } catch (err) {
-    console.error('Database initialization error:', err);
+    console.error('Database initialization error');
     process.exit(1);
   }
 }

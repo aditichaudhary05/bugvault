@@ -1,5 +1,5 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import HomeNavbar from '../components/HomeNavbar';
 import DarkVeil from '../components/DarkVeil';
 import GlareHover from '../components/GlareHover';
 import SpotlightCard from '../components/SpotlightCard';
@@ -7,26 +7,32 @@ import './Home.css';
 
 export default function Home({ user, setUser }) {
   const navigate = useNavigate();
+  const [stats, setStats] = useState({ totalBugs: 0, resolved: 0, lastMonth: 0, tagCount: 0 });
+  const [loading, setLoading] = useState(true);
 
-  const handleLogout = async () => {
-    try {
-      await fetch('http://localhost:7000/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      setUser(null);
-      navigate('/');
-    } catch {
-      console.error('Logout failed');
-    }
-  };
+  useEffect(() => {
+    fetch('http://localhost:7000/api/stats', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const s = data.stats;
+          setStats({
+            totalBugs: s.totalBugs,
+            resolved: s.resolved,
+            lastMonth: s.lastMonth,
+            tagCount: s.topTags?.length || 0,
+          });
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   return (
     <div className="app">
       <div className="bg">
         <DarkVeil />
       </div>
-      <HomeNavbar user={user} onLogout={handleLogout} />
       <section className="home">
         <div className="home__layout">
           <div className="home__left">
@@ -65,7 +71,7 @@ export default function Home({ user, setUser }) {
           <div className="home__right">
             <SpotlightCard className="home__quick-actions" spotlightColor="rgba(124, 58, 237, 0.3)">
               <h3 className="home__quick-title">Quick Actions</h3>
-              <Link to="/bugs/new" className="home__quick-item">
+              <button type="button" className="home__quick-item" onClick={() => navigate('/bugs/new')}>
                 <div className="home__quick-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -81,8 +87,8 @@ export default function Home({ user, setUser }) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="home__quick-arrow">
                   <path d="m9 18 6-6-6-6"/>
                 </svg>
-              </Link>
-              <Link to="/bugs" className="home__quick-item">
+              </button>
+              <button type="button" className="home__quick-item" onClick={() => navigate('/bugs')}>
                 <div className="home__quick-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8"/>
@@ -96,8 +102,8 @@ export default function Home({ user, setUser }) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="home__quick-arrow">
                   <path d="m9 18 6-6-6-6"/>
                 </svg>
-              </Link>
-              <Link to="/tags" className="home__quick-item">
+              </button>
+              <button type="button" className="home__quick-item" onClick={() => navigate('/tags')}>
                 <div className="home__quick-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
@@ -111,11 +117,11 @@ export default function Home({ user, setUser }) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="home__quick-arrow">
                   <path d="m9 18 6-6-6-6"/>
                 </svg>
-              </Link>
+              </button>
             </SpotlightCard>
           </div>
         </div>
-        <div className="home__stats">
+        <SpotlightCard className="home__stats" spotlightColor="rgba(124, 58, 237, 0.2)">
           <div className="home__stat">
             <div className="home__stat-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -133,7 +139,7 @@ export default function Home({ user, setUser }) {
               </svg>
             </div>
             <div className="home__stat-info">
-              <span className="home__stat-number">24</span>
+              <span className="home__stat-number">{loading ? '—' : stats.totalBugs}</span>
               <span className="home__stat-label">Bugs Logged</span>
             </div>
           </div>
@@ -145,7 +151,7 @@ export default function Home({ user, setUser }) {
               </svg>
             </div>
             <div className="home__stat-info">
-              <span className="home__stat-number">17</span>
+              <span className="home__stat-number">{loading ? '—' : stats.resolved}</span>
               <span className="home__stat-label">Resolved</span>
             </div>
           </div>
@@ -157,7 +163,7 @@ export default function Home({ user, setUser }) {
               </svg>
             </div>
             <div className="home__stat-info">
-              <span className="home__stat-number">8</span>
+              <span className="home__stat-number">{loading ? '—' : stats.tagCount}</span>
               <span className="home__stat-label">Tags</span>
             </div>
           </div>
@@ -169,11 +175,11 @@ export default function Home({ user, setUser }) {
               </svg>
             </div>
             <div className="home__stat-info">
-              <span className="home__stat-number">6</span>
+              <span className="home__stat-number">{loading ? '—' : stats.lastMonth}</span>
               <span className="home__stat-label">This Month</span>
             </div>
           </div>
-        </div>
+        </SpotlightCard>
       </section>
     </div>
   );
