@@ -4,6 +4,8 @@ import SpecularButton from '../components/SpecularButton';
 import SpotlightCard from '../components/SpotlightCard';
 import './Tags.css';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function timeAgo(dateStr) {
   if (!dateStr) return '—';
   const now = new Date();
@@ -72,7 +74,7 @@ export default function Tags({ user, setUser }) {
   }, []);
 
   const fetchTags = () => {
-    fetch('http://localhost:7000/api/tags', { credentials: 'include' })
+    fetch('`${API_URL}/api/`tags', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -94,7 +96,7 @@ export default function Tags({ user, setUser }) {
     }
 
     try {
-      const res = await fetch('http://localhost:7000/api/bugs', {
+      const res = await fetch('`${API_URL}/api/`bugs', {
         method: 'GET',
         credentials: 'include',
       });
@@ -104,7 +106,7 @@ export default function Tags({ user, setUser }) {
         const bug = data.bugs[0];
         const existingTags = bug.tags || [];
         if (!existingTags.includes(newTagName.trim())) {
-          await fetch(`http://localhost:7000/api/bugs/${bug.id}`, {
+          await fetch(`${API_URL}/api/bugs/${bug.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -132,7 +134,7 @@ export default function Tags({ user, setUser }) {
     }
 
     try {
-      const res = await fetch(`http://localhost:7000/api/tags/${encodeURIComponent(editTagName)}`, {
+      const res = await fetch(`${API_URL}/api/tags/${encodeURIComponent(editTagName)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -156,7 +158,7 @@ export default function Tags({ user, setUser }) {
   const handleDeleteTag = async (tagName) => {
     if (!confirm(`Delete tag "${tagName}" from all bugs?`)) return;
     try {
-      await fetch(`http://localhost:7000/api/tags/${encodeURIComponent(tagName)}`, {
+      await fetch(`${API_URL}/api/tags/${encodeURIComponent(tagName)}`, {
         method: 'DELETE',
         credentials: 'include',
       });

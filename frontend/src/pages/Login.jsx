@@ -4,6 +4,8 @@ import DarkVeil from '../components/DarkVeil';
 import SpotlightCard from '../components/SpotlightCard';
 import './Auth.css';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Login({ setUser }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -20,7 +22,7 @@ export default function Login({ setUser }) {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:7000/api/auth/login', {
+      const res = await fetch('`${API_URL}/api/auth/login`', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

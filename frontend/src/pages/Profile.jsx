@@ -67,7 +67,7 @@ function getTagColor(name) {
   return tagColors[name.toLowerCase()] || '#7C3AED';
 }
 
-const API = 'http://localhost:7000';
+const API = import.meta.env.VITE_API_URL;
 
 function resolveImg(src) {
   if (!src) return '';
@@ -110,7 +110,7 @@ export default function Profile() {
   }, []);
 
   const fetchProfile = () => {
-    fetch('http://localhost:7000/api/profile', { credentials: 'include' })
+    fetch(`${API}/api/profile`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) setProfile(data.profile);
@@ -121,7 +121,7 @@ export default function Profile() {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:7000/api/auth/logout', {
+      await fetch(`${API}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -180,7 +180,7 @@ export default function Profile() {
         formData.append('profilePicture', editFile);
       }
 
-      const res = await fetch('http://localhost:7000/api/profile', {
+      const res = await fetch(`${API}/api/profile`, {
         method: 'PUT',
         credentials: 'include',
         body: formData,

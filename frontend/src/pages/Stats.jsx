@@ -5,6 +5,8 @@ import DarkVeil from '../components/DarkVeil';
 import SpotlightCard from '../components/SpotlightCard';
 import './Stats.css';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Stats({ user, setUser }) {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('Daily');
@@ -20,7 +22,7 @@ export default function Stats({ user, setUser }) {
       root.style.height = 'auto';
     }
 
-    fetch('http://localhost:7000/api/stats', { credentials: 'include' })
+    fetch('`${API_URL}/api/stats`', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) setStats(data.stats);

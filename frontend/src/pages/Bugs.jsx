@@ -4,6 +4,8 @@ import DarkVeil from '../components/DarkVeil';
 import SpotlightCard from '../components/SpotlightCard';
 import './Bugs.css';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function getBugStatus(bug) {
   if (bug.status) return bug.status;
   if (bug.solution) return 'Resolved';
@@ -67,7 +69,7 @@ export default function Bugs({ user, setUser }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:7000/api/bugs', { credentials: 'include' })
+    fetch('`${API_URL}/api/bugs`', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) setBugs(data.bugs);
@@ -168,7 +170,7 @@ export default function Bugs({ user, setUser }) {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`http://localhost:7000/api/bugs/${id}`, { method: 'DELETE', credentials: 'include' });
+      await fetch(`${API_URL}/api/bugs/${id}`, { method: 'DELETE', credentials: 'include' });
       setBugs(prev => prev.filter(b => b.id !== id));
       setOpenMenuId(null);
     } catch { console.error('Delete failed'); }

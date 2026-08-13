@@ -4,6 +4,8 @@ import DarkVeil from '../components/DarkVeil';
 import SpotlightCard from '../components/SpotlightCard';
 import './NewBug.css';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function NewBug() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -49,7 +51,7 @@ export default function NewBug() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:7000/api/bugs', {
+      const res = await fetch('`${API_URL}/api/bugs`', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import DarkVeil from '../components/DarkVeil';
 import './BugDetail.css';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function parseTags(tags) {
   if (!tags) return [];
   if (Array.isArray(tags)) return tags;
@@ -51,8 +53,8 @@ export default function BugDetail() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`http://localhost:7000/api/bugs/${id}`, { credentials: 'include' }).then(r => r.json()),
-      fetch('http://localhost:7000/api/bugs', { credentials: 'include' }).then(r => r.json()),
+      fetch(`${API_URL}/api/bugs/${id}`, { credentials: 'include' }).then(r => r.json()),
+      fetch(`${API_URL}/api/bugs`, { credentials: 'include' }).then(r => r.json()),
     ]).then(([bugData, bugsData]) => {
       if (bugData.success) setBug(bugData.bug);
       if (bugsData.success) setAllBugs(bugsData.bugs);
@@ -103,7 +105,7 @@ export default function BugDetail() {
     if (newStatus === (bug.status || status)) return;
     setUpdatingStatus(true);
     try {
-      const res = await fetch(`http://localhost:7000/api/bugs/${bug.id}`, {
+      const res = await fetch(`${API_URL}/api/bugs/${bug.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

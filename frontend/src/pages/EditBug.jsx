@@ -4,6 +4,8 @@ import DarkVeil from '../components/DarkVeil';
 import SpotlightCard from '../components/SpotlightCard';
 import './NewBug.css';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function parseTags(tags) {
   if (!tags) return [];
   if (Array.isArray(tags)) return tags;
@@ -25,7 +27,7 @@ export default function EditBug() {
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:7000/api/bugs/${id}`, { credentials: 'include' })
+    fetch(`${API_URL}/api/bugs/${id}`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success && data.bug) {
@@ -77,7 +79,7 @@ export default function EditBug() {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:7000/api/bugs/${id}`, {
+      const res = await fetch(`${API_URL}/api/bugs/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

@@ -5,13 +5,15 @@ import GlareHover from '../components/GlareHover';
 import SpotlightCard from '../components/SpotlightCard';
 import './Home.css';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Home({ user, setUser }) {
   const navigate = useNavigate();
   const [stats, setStats] = useState({ totalBugs: 0, resolved: 0, lastMonth: 0, tagCount: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:7000/api/stats', { credentials: 'include' })
+    fetch('`${API_URL}/api/stats`', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) {

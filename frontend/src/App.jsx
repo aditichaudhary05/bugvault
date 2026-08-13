@@ -102,12 +102,14 @@ function LandingPage({ user }) {
   )
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('http://localhost:7000/api/auth/me', { credentials: 'include' })
+    fetch(`${API_URL}/api/auth/me`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.authenticated) {
@@ -132,7 +134,7 @@ function AppRoutes({ user, setUser, loading }) {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:7000/api/auth/logout', {
+      await fetch(`${API_URL}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
