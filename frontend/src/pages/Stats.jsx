@@ -244,9 +244,9 @@ export default function Stats({ user, setUser }) {
             <h3>Bugs by Status</h3>
             <div className="stats__donut-section">
               <div className="stats__donut-wrapper">
-                <ResponsiveContainer width={180} height={180}>
+                <ResponsiveContainer width={140} height={140}>
                   <PieChart>
-                    <Pie data={statusData} cx="50%" cy="50%" innerRadius={48} outerRadius={76} dataKey="value">
+                    <Pie data={statusData} cx="50%" cy="50%" innerRadius={38} outerRadius={60} dataKey="value">
                       {statusData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                     </Pie>
                   </PieChart>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import DarkVeil from '../components/DarkVeil';
 import SpotlightCard from '../components/SpotlightCard';
@@ -26,6 +26,8 @@ export default function NewBug() {
   const [tagInput, setTagInput] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [files, setFiles] = useState([]);
+  const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -43,6 +45,16 @@ export default function NewBug() {
 
   const removeTag = (tag) => {
     setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) });
+  };
+
+  const handleFileChange = (e) => {
+    const selected = Array.from(e.target.files);
+    setFiles(prev => [...prev, ...selected]);
+    e.target.value = '';
+  };
+
+  const removeFile = (index) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -213,14 +225,35 @@ export default function NewBug() {
               </div>
             </div>
 
-            <div className="newbug-modal__attach">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-              </svg>
-              <div className="newbug-modal__attach-text">
-                <span>Attach files</span>
-                <span className="newbug-modal__attach-desc">Screenshots, logs, or any helpful file</span>
+            <div className="newbug-modal__field">
+              <label className="newbug-modal__label"><span className="newbug-modal__dot"></span>Attachments</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="newbug-modal__file-input"
+                onChange={handleFileChange}
+              />
+              <div className="newbug-modal__attach" onClick={() => fileInputRef.current?.click()}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                </svg>
+                <div className="newbug-modal__attach-text">
+                  <span>Attach files</span>
+                  <span className="newbug-modal__attach-desc">Screenshots, logs, or any helpful file</span>
+                </div>
               </div>
+              {files.length > 0 && (
+                <div className="newbug-modal__files">
+                  {files.map((file, i) => (
+                    <div key={i} className="newbug-modal__file">
+                      <span className="newbug-modal__file-name">{file.name}</span>
+                      <span className="newbug-modal__file-size">{(file.size / 1024).toFixed(1)} KB</span>
+                      <button type="button" className="newbug-modal__file-remove" onClick={() => removeFile(i)}>&times;</button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="newbug-modal__actions">

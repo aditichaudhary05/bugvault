@@ -203,8 +203,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 180px;
-  height: 180px;
+  width: 140px;
+  height: 140px;
 }
 
 .stats__donut-center {
@@ -246,37 +246,43 @@
 .stats__legend {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .stats__legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .stats__legend-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .stats__legend-label {
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.6);
-  min-width: 70px;
+  white-space: nowrap;
 }
 
 .stats__legend-count {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #fff;
   font-weight: 600;
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 .stats__legend-pct {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
 }
 
 .stats__bottom {
@@ -406,12 +412,12 @@
 }
 
 .stats__status-stat-value {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
 .stats__status-stat-label {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.4);
 }
 
