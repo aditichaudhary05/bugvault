@@ -24,6 +24,10 @@ const app = express();
 const PORT = process.env.PORT || 7000;
 const isProduction = process.env.NODE_ENV === 'production';
 
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
+
 app.use(helmet());
 
 const authLimiter = rateLimit({
@@ -75,7 +79,7 @@ const sessionConfig = {
   cookie: {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? 'strict' : 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
 };
