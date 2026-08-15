@@ -51,7 +51,7 @@ export default function NewBug() {
     setLoading(true);
 
     try {
-      const res = await fetch('`${API_URL}/api/bugs`', {
+      const res = await fetch(`${API_URL}/api/bugs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

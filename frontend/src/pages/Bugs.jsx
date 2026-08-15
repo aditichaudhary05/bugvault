@@ -69,7 +69,7 @@ export default function Bugs({ user, setUser }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetch('`${API_URL}/api/bugs`', { credentials: 'include' })
+    fetch(`${API_URL}/api/bugs`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) setBugs(data.bugs);

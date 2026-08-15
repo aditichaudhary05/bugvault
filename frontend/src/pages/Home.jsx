@@ -13,7 +13,7 @@ export default function Home({ user, setUser }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('`${API_URL}/api/stats`', { credentials: 'include' })
+    fetch(`${API_URL}/api/stats`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) {

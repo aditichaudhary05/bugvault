@@ -74,7 +74,7 @@ export default function Tags({ user, setUser }) {
   }, []);
 
   const fetchTags = () => {
-    fetch('`${API_URL}/api/`tags', { credentials: 'include' })
+    fetch(`${API_URL}/api/tags`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -96,7 +96,7 @@ export default function Tags({ user, setUser }) {
     }
 
     try {
-      const res = await fetch('`${API_URL}/api/`bugs', {
+      const res = await fetch(`${API_URL}/api/bugs`, {
         method: 'GET',
         credentials: 'include',
       });

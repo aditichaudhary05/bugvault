@@ -22,7 +22,7 @@ export default function Stats({ user, setUser }) {
       root.style.height = 'auto';
     }
 
-    fetch('`${API_URL}/api/stats`', { credentials: 'include' })
+    fetch(`${API_URL}/api/stats`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) setStats(data.stats);
